@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<head>
+    <title>DOM sounds</title>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
+    <script src="./index.js"></script>
+    <style>
+      .matrix {
+        display: block;
+        width: 40em;
+        height: 40em;
+        border: 1px solid black;
+      }
+
+      .matrix > div {
+        display: flex;
+        flex: 1
+      }
+
+      .matrix > div > div {
+        display: block;
+        width: 5em;
+        height: 5em;
+      }
+
+      .matrix > div > div:hover {
+        background-color: black;
+      }
+    </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Sound effect generator</h1>
+    <p>
+      Click and drag to color.
+      <br />
+      Each time a square changes to red the DOM changes.
+      <br />
+      The MutationObserver detects those changes and emits a sound.
+      <br />
+      The sounds effect is sine wave.
+    </p>
+    <div class="matrix">
+      <!-- 8x8 matrix -->
+      <div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div></div>
+      <div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div></div>
+      <div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div></div>
+      <div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div></div>
+      <div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div></div>
+      <div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div></div>
+      <div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div></div>
+      <div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div></div>
+    </div>
+
+    <p class="lead">
+      For more fun, copy/paste the snippet below into the console of your favorite React app.
+    </p>
+    <pre>
+const audioCtx = new AudioContext();
+
+const playSound = (value) => {
+  const oscillator = audioCtx.createOscillator()
+  oscillator.type = "sine"
+  oscillator.connect(audioCtx.destination)
+
+  oscillator.frequency.setValueAtTime(
+    Math.log(value + 5) * 170,
+    audioCtx.currentTime,
+  );
+  oscillator.start()
+  oscillator.stop(audioCtx.currentTime + 0.01);
+};
+
+// Listens to changes in the 
+const observer = new MutationObserver(mutationsList => playSound(mutationsList.length));
+observer.observe(document, {
+  attributes: true,
+  childList: true,
+  subtree: true,
+  characterData: true,
+});
+    </pre>
+  </div>
+
+  <script>
+    let down = false;
+    const matrix = document.querySelector(".matrix");
+    matrix.childNodes.forEach(row => row.childNodes.forEach(cell => {
+      cell.addEventListener('mousedown', () => {
+        down = true;
+        cell.style.backgroundColor = 'red';
+      });
+      cell.addEventListener('mouseup', () => {
+        down = false;
+      });
+      cell.addEventListener('mousemove', () => {
+        if (down) {
+          cell.style.backgroundColor = 'red';
+        }
+      });
+  }));
+  </script>
+</body>
